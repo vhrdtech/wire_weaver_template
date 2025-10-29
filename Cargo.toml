@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+
+members = [
+  "api",
+  "driver",
+  "gui"
+]
+
+exclude = ["fw"]
+
+[workspace.dependencies]
+wire_weaver = { path = "../wire_weaver/wire_weaver", default-features = false }

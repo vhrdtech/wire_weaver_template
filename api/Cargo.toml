@@ -1,0 +1,11 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wire_weaver = { workspace = true }
+
+[features]
+std = ["wire_weaver/std"]
+defmt = ["wire_weaver/defmt"]

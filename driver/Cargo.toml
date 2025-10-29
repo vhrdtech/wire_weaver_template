@@ -1,0 +1,12 @@
+[package]
+name = "driver"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+api = { path = "../api" }
+wire_weaver = { workspace = true }
+wire_weaver_client_common = { path = "../../wire_weaver/wire_weaver_client_common" }
+wire_weaver_usb_host = { path = "../../wire_weaver/wire_weaver_usb_host" }
+ww_client_server = { path = "../../wire_weaver/ww_client_server" }
+tokio = { version = "1", features = ["sync", "rt"] }

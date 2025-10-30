@@ -4,7 +4,8 @@ resolver = "3"
 members = [
   "api",
   "driver",
-  "gui"
+  "gui",
+  "repl"
 ]
 
 exclude = ["fw"]

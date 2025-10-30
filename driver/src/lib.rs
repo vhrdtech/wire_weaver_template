@@ -6,6 +6,7 @@ use wire_weaver_usb_host::{usb_worker, ConnectionInfo};
 use wire_weaver::{ww_api, ProtocolInfo};
 pub use wire_weaver_client_common::{OnError};
 pub use wire_weaver_client_common::DeviceFilter;
+pub use api::LedState;
 
 pub struct MyDeviceDriver {
     args_scratch: [u8; 512],

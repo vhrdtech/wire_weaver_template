@@ -10,7 +10,7 @@ defmt-rtt = "1.0" # consider disable-blocking-mode
 panic-probe = { version = "1.0", features = ["print-defmt"] }
 
 cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
-embassy-stm32 = { version = "0.4.0", features = ["defmt", "stm32g0b1ce", "unstable-pac", "exti", "time-driver-tim2" ]  }
+embassy-stm32 = { version = "0.4.0", features = ["defmt", "stm32g0b1ce", "unstable-pac", "exti", "time-driver-tim2"] }
 portable-atomic = { version = "1.11", features = ["critical-section"] } # to make static_cell work
 static_cell = "2.1"
 
@@ -24,6 +24,7 @@ embassy-executor = { version = "0.9.1", features = [
 embassy-time = { version = "0.5.0", features = ["defmt", "defmt-timestamp-uptime", "tick-hz-32_768"] }
 embassy-sync = { version = "0.7.2", features = ["defmt"] }
 embassy-usb = { version = "0.5", features = ["defmt"] }
+embassy-futures = "0.1"
 
 api = { path = "../../api" }
 wire_weaver_usb_embassy = { path = "../../../wire_weaver/wire_weaver_usb_embassy" }
@@ -32,6 +33,14 @@ wire_weaver = { path = "../../../wire_weaver/wire_weaver", default-features = fa
     "defmt",
 ] }
 ww_client_server = { path = "../../../wire_weaver/ww_client_server", default-features = false }
+
+# to solve "can't find crate for test on IntelliJ"
+[[bin]]
+name = "cannify_micro_g0b1cetxn"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
 
 # see for more info: https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html
 # cargo build/run

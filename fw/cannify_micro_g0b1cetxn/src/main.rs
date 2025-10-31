@@ -5,11 +5,9 @@
 mod init;
 
 use api::LedState;
-use core::pin::pin;
 use cortex_m_rt::exception;
 use defmt::*;
 use defmt_rtt as _;
-use embassy_futures::select::{Either, select};
 use embassy_stm32::{
     Config, bind_interrupts,
     gpio::{Level, Output, Speed},
@@ -17,13 +15,14 @@ use embassy_stm32::{
     usb,
     usb::Driver,
 };
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::channel::{Channel, Receiver};
 use embassy_time::Timer;
 use panic_probe as _;
 use static_cell::StaticCell;
-use wire_weaver::{WireWeaverAsyncApiBackend, shrink_wrap, ww_api, ww_version::FullVersion};
+use wire_weaver::{
+    MessageSink, WireWeaverAsyncApiBackend, shrink_wrap, ww_api, ww_version::FullVersion,
+};
 use wire_weaver_usb_embassy::{UsbBuffers, UsbServer, UsbTimings, usb_init};
+use ww_client_server::ShaperConfig;
 
 bind_interrupts!(struct Irqs {
     USB_UCPD1_2 => usb::InterruptHandler<USB>;
@@ -34,29 +33,8 @@ const MAX_MESSAGE_LEN: usize = 1024; // Maximum WireWeaver message length
 static USB_BUFFERS: StaticCell<UsbBuffers<MAX_USB_PACKET_LEN, MAX_MESSAGE_LEN>> = StaticCell::new();
 
 #[embassy_executor::task]
-async fn usb_server_task(
-    mut usb_server: UsbServer<'static, Driver<'static, USB>, ServerState>,
-    rx: Receiver<'static, CriticalSectionRawMutex, u32, 8>,
-) {
-    let mut server_fut = pin!(usb_server.run());
-    loop {
-        let Either::Second(val) = select(&mut server_fut, rx.receive()).await;
-        info!("got val = {}", val);
-    }
-}
-
-struct ServerState {
-    led: Output<'static>,
-}
-
-impl ServerState {
-    async fn set_led_state(&mut self, state: LedState) {
-        match state {
-            LedState::Off => self.led.set_low(),
-            LedState::On => self.led.set_high(),
-            LedState::Blinking => {}
-        }
-    }
+async fn usb_server_task(mut usb_server: UsbServer<'static, Driver<'static, USB>, ServerState>) {
+    usb_server.run().await;
 }
 
 impl WireWeaverAsyncApiBackend for ServerState {
@@ -71,9 +49,23 @@ impl WireWeaverAsyncApiBackend for ServerState {
             .await
     }
 
+    async fn send_updates(
+        &mut self,
+        sink: &mut impl MessageSink,
+        scratch_value: &mut [u8],
+        scratch_event: &mut [u8],
+    ) {
+        let message = api_impl::usart_rx_stream_ser(&1234, scratch_value, scratch_event);
+        _ = sink.send(message.unwrap()).await;
+    }
+
     fn version(&self) -> FullVersion<'_> {
         api::DEVICE_API_ROOT_FULL_GID
     }
+}
+
+struct ServerState {
+    led: Output<'static>,
 }
 
 ww_api!(
@@ -83,6 +75,29 @@ ww_api!(
     property_model = "_=get_set",
     //debug_to_file = "./target/ws.rs" // uncomment if you want to see the resulting AST and generated code
 );
+
+impl ServerState {
+    async fn set_led_state(&mut self, state: LedState) {
+        match state {
+            LedState::Off => self.led.set_low(),
+            LedState::On => self.led.set_high(),
+            LedState::Blinking => {}
+        }
+    }
+
+    async fn usart_rx_open(&mut self) -> Result<(), ww_client_server::Error> {
+        Ok(())
+    }
+    async fn usart_rx_close(&mut self) -> Result<(), ww_client_server::Error> {
+        Ok(())
+    }
+    async fn usart_rx_change_rate(
+        &mut self,
+        _config: &ShaperConfig,
+    ) -> Result<(), ww_client_server::Error> {
+        Ok(())
+    }
+}
 
 #[embassy_executor::main]
 async fn main(spawner: embassy_executor::Spawner) {
@@ -97,20 +112,16 @@ async fn main(spawner: embassy_executor::Spawner) {
 
     let driver = Driver::new(p.USB, Irqs, p.PA12, p.PA11);
     let buffers = USB_BUFFERS.init(UsbBuffers::default());
-    let usb_server = usb_init(driver, buffers, state, UsbTimings::default_fs(), |config| {
+    let (usb_server, tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), |config| {
         config.serial_number = Some(embassy_stm32::uid::uid_hex());
     });
-    static SHARED_CHANNEL: Channel<CriticalSectionRawMutex, u32, 8> = Channel::new();
-    unwrap!(spawner.spawn(usb_server_task(usb_server, SHARED_CHANNEL.receiver())));
+    unwrap!(spawner.spawn(usb_server_task(usb_server)));
 
     info!("init done");
-    let tx = SHARED_CHANNEL.sender();
-    let mut i = 0;
     loop {
         info!("loop");
         Timer::after_millis(2000).await;
-        tx.send(i).await;
-        i = i.saturating_add(1);
+        _ = tx.try_send(());
     }
 }
 

@@ -42,7 +42,7 @@ ww_api!(
     no_alloc = true,
     use_async = true,
     //derive = "Debug",
-    //debug_to_file = "./target/ww_no_alloc.rs"
+    //debug_to_file = "../target/ww_no_alloc.rs"
 );
 
 fn start_ws_worker(

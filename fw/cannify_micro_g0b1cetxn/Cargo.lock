@@ -1369,6 +1369,7 @@ version = "0.4.0"
 dependencies = [
  "defmt 1.0.1",
  "embassy-futures",
+ "embassy-sync",
  "embassy-time",
  "embassy-usb",
  "wire_weaver",

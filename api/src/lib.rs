@@ -9,8 +9,8 @@ pub trait DeviceApiRoot {
     // property!(ro button_pressed: bool);
     // stream_up!(core_temperature: f32);
 
-    // stream_down!(usart_tx: &[u8]);
-    // stream_up!(usart_rx: &[u8]);
+    stream!(usart_rx: u32);
+    // sink!(usart_tx: &[u8]);
 }
 
 #[derive_shrink_wrap]

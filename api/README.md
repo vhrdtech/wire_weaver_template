@@ -16,6 +16,6 @@ Client code can then handle both devices and show a suggestion to update the fir
 while all the previous functionality should still work as expected.
 
 WireWeaver supports both backwards and forwards compatibility at the wire format level, but you need to ensure to follow
-the [evolution rules](TODO link to evolution rules) for this to work properly.
+the [evolution rules](https://vhrdtech.github.io/wire_weaver/evolution/rules/) for this to work properly.
 Git pre-commit check is setup on this repository that will do these checks automatically
 (WARNING: evolution checker is not yet fully featured and can miss errors).

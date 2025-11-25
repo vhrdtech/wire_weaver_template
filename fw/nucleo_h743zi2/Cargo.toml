@@ -32,6 +32,14 @@ wire_weaver = { path = "../../../wire_weaver/wire_weaver", default-features = fa
 ] }
 ww_client_server = { path = "../../../wire_weaver/ww_client_server", default-features = false }
 
+# to solve "can't find crate for test on IntelliJ"
+[[bin]]
+name = "nucleo_h743zi2"
+path = "src/main.rs"
+test = false
+doctest = false
+bench = false
+
 # see for more info: https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html
 # cargo build/run
 [profile.dev]

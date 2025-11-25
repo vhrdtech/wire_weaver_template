@@ -1,6 +1,13 @@
 # wire_weaver_template
 
-## TODO
+## Overview
+* `api` - Common data types and API description, used by fw driver crates.
+* `fw` - Example firmwares for several development boards with USB support.
+* `driver` - Rust driver with API client.
+  * `driver/examples/simple` - Basic API client usage example.
+  * `driver/examples/repl` - REPL based on clap, supports command history and auto-complete.
+
+## Step-by-step guide
 * [ ] Checkout the `api` crate [README](api/README.md)
 * [ ] Run one of the firmwares
   * [ ] If you do not have hardware to run it - adapt to other dev. board with USB that embassy supports
@@ -18,3 +25,7 @@ Fetch changes from upstream:
 
 Merge:
 `git merge upstream/main --allow-unrelated-histories`
+
+If you did not made any local changes, merge accepting remote changes:
+Make sure to commit and push or backup your changes before executing this command.
+`git merge upstream/main --allow-unrelated-histories --strategy-option theirs`

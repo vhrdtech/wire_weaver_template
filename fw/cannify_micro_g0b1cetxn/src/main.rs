@@ -18,11 +18,10 @@ use embassy_stm32::{
 use embassy_time::Timer;
 use panic_probe as _;
 use static_cell::StaticCell;
-use wire_weaver::{
-    MessageSink, WireWeaverAsyncApiBackend, shrink_wrap, ww_api, ww_version::FullVersion,
-};
+use wire_weaver::prelude::*;
+use wire_weaver::{MessageSink, WireWeaverAsyncApiBackend};
 use wire_weaver_usb_embassy::{UsbBuffers, UsbServer, UsbTimings, usb_init};
-use ww_client_server::ShaperConfig;
+use ww_client_server::{StreamSidebandCommand, StreamSidebandEvent};
 
 bind_interrupts!(struct Irqs {
     USB_UCPD1_2 => usb::InterruptHandler<USB>;
@@ -55,7 +54,11 @@ impl WireWeaverAsyncApiBackend for ServerState {
         scratch_value: &mut [u8],
         scratch_event: &mut [u8],
     ) {
-        let message = api_impl::usart_rx_stream_ser(&1234, scratch_value, scratch_event);
+        let message = api_impl::usart_rx_data_ser(
+            &RefVec::new_bytes(&[0, 1, 2, 3, 4]),
+            scratch_value,
+            scratch_event,
+        );
         _ = sink.send(message.unwrap()).await;
     }
 
@@ -73,7 +76,7 @@ ww_api!(
     server = true, no_alloc = true, use_async = true,
     method_model = "_=immediate",
     property_model = "_=get_set",
-    //debug_to_file = "./target/ws.rs" // uncomment if you want to see the resulting AST and generated code
+    debug_to_file = "./target/ws.rs" // uncomment if you want to see the resulting AST and generated code
 );
 
 impl ServerState {
@@ -85,17 +88,22 @@ impl ServerState {
         }
     }
 
-    async fn usart_rx_open(&mut self) -> Result<(), ww_client_server::Error> {
-        Ok(())
-    }
-    async fn usart_rx_close(&mut self) -> Result<(), ww_client_server::Error> {
-        Ok(())
-    }
-    async fn usart_rx_change_rate(
+    async fn usart_rx_sideband(
         &mut self,
-        _config: &ShaperConfig,
-    ) -> Result<(), ww_client_server::Error> {
-        Ok(())
+        _cmd: StreamSidebandCommand,
+    ) -> Option<StreamSidebandEvent> {
+        None
+    }
+
+    async fn usart_tx_write(&mut self, data: &[u8]) {
+        info!("tx: {:?}", data);
+    }
+
+    async fn usart_tx_sideband(
+        &mut self,
+        _cmd: StreamSidebandCommand,
+    ) -> Option<StreamSidebandEvent> {
+        None
     }
 }
 

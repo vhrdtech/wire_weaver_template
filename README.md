@@ -1,11 +1,19 @@
 # wire_weaver_template
 
+This template showcases how to use WireWeaver on real hardware, connected via USB. Only basic functionality is used to
+keep things simple.
+
 ## Overview
 * `api` - Common data types and API description, used by fw driver crates.
 * `fw` - Example firmwares for several development boards with USB support.
+  * `fw/nucleo_h743zi2` - works on Nucleo H743ZI2 and H753ZI boards
+  * `fw/cannify_micro_g0b1cetxn` - vhrd.tech internal dev board, but can be easily adapted to STM32G0 boards
 * `driver` - Rust driver with API client.
   * `driver/examples/simple` - Basic API client usage example.
   * `driver/examples/repl` - REPL based on clap, supports command history and auto-complete.
+
+Note that `fw` folder is excluded from Cargo workspace. If your IDE is struggling to properly parse this setup, open
+fw projects separately.
 
 ## Step-by-step guide
 * [ ] Checkout the `api` crate [README](api/README.md)
@@ -14,6 +22,7 @@
   * [ ] TODO: Alternatively - run the virtual device emulator (can later be used for integration tests as well)
 * [ ] Run driver/examples/simple: `cargo run -p driver --example simple`
 * [ ] Optionally checkout the REPL example in driver/examples/repl: `cargo run -p driver --example repl`
+* [ ] Optionally inspect `target/generated_std_client.rs` and `fw/_/target/generated_no_std_server.rs`
 * [ ] Rename `api` crate to your name (this will break the code in several places, TODO: add rename script)
 
 ## Syncing upstream template changes

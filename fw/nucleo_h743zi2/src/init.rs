@@ -1,6 +1,3 @@
-pub(crate) fn init() {
-    }
-
 /// Corrupted content of the RTC domain due to a missed power-on reset after this domain supply voltage drop.
 /// Leads to hard to debug gotchas (LSE enables by itself, PC13 / PC14 / PC15 and others set to output).
 /// The solution is to reset the backup domain when RTC is not used.

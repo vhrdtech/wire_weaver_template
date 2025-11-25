@@ -3,54 +3,159 @@
 #![feature(impl_trait_in_assoc_type)]
 
 mod init;
-mod init_ram;
+
+use api::LedState;
+use cortex_m_rt::exception;
 use defmt::*;
 use defmt_rtt as _;
-use embassy_stm32::gpio::{Level, Output, Speed};
+use embassy_stm32::{
+    Config, bind_interrupts,
+    gpio::{Level, Output, Speed},
+    peripherals::USB_OTG_FS,
+    usb,
+    usb::Driver,
+};
 use embassy_time::Timer;
 use panic_probe as _;
-use cortex_m_rt::exception;
-use embassy_stm32::{Config, bind_interrupts, peripherals, usb};
-use embassy_stm32::usb::Driver;
+use static_cell::StaticCell;
+use wire_weaver::prelude::*;
+use wire_weaver::{MessageSink, WireWeaverAsyncApiBackend};
+use wire_weaver_usb_embassy::{UsbBuffers, UsbServer, UsbTimings, usb_init};
+use ww_client_server::{StreamSidebandCommand, StreamSidebandEvent};
 
 bind_interrupts!(struct Irqs {
-    OTG_FS => usb::InterruptHandler<peripherals::USB_OTG_FS>;
+    OTG_FS => usb::InterruptHandler<USB_OTG_FS>;
 });
 
+const MAX_USB_PACKET_LEN: usize = 64; // 64 for FullSpeed, 1024 for HighSpeed
+const MAX_MESSAGE_LEN: usize = 1024; // Maximum WireWeaver message length
+static USB_BUFFERS: StaticCell<UsbBuffers<MAX_USB_PACKET_LEN, MAX_MESSAGE_LEN>> = StaticCell::new();
+
+#[embassy_executor::task]
+async fn usb_server_task(mut usb_server: UsbServer<'static, Driver<'static, USB_OTG_FS>, ServerState>) {
+    usb_server.run().await;
+}
+
+impl WireWeaverAsyncApiBackend for ServerState {
+    async fn process_bytes<'a>(
+        &mut self,
+        data: &[u8],
+        scratch_args: &'a mut [u8],
+        scratch_event: &'a mut [u8],
+        scratch_err: &'a mut [u8],
+    ) -> Result<&'a [u8], shrink_wrap::Error> {
+        self.process_request_bytes(data, scratch_args, scratch_event, scratch_err)
+            .await
+    }
+
+    async fn send_updates(
+        &mut self,
+        sink: &mut impl MessageSink,
+        scratch_value: &mut [u8],
+        scratch_event: &mut [u8],
+    ) {
+        let message = api_impl::usart_rx_data_ser(
+            &RefVec::new_bytes(&[0, 1, 2, 3, 4]),
+            scratch_value,
+            scratch_event,
+        );
+        _ = sink.send(message.unwrap()).await;
+    }
+
+    fn version(&self) -> FullVersion<'_> {
+        api::DEVICE_API_ROOT_FULL_GID
+    }
+}
+
+struct ServerState {
+    led: Output<'static>,
+}
+
+ww_api!(
+    "../../api/src/lib.rs" as api::DeviceApiRoot for ServerState,
+    server = true, no_alloc = true, use_async = true,
+    method_model = "_=immediate",
+    property_model = "_=get_set",
+    debug_to_file = "./target/generated_no_std_server.rs" // uncomment if you want to see the resulting AST and generated code
+);
+
+impl ServerState {
+    async fn set_led_state(&mut self, state: LedState) {
+        match state {
+            LedState::Off => self.led.set_low(),
+            LedState::On => self.led.set_high(),
+            LedState::Blinking => {}
+        }
+    }
+
+    async fn usart_rx_sideband(
+        &mut self,
+        _cmd: StreamSidebandCommand,
+    ) -> Option<StreamSidebandEvent> {
+        None
+    }
+
+    async fn usart_tx_write(&mut self, data: &[u8]) {
+        info!("tx: {:?}", data);
+    }
+
+    async fn usart_tx_sideband(
+        &mut self,
+        _cmd: StreamSidebandCommand,
+    ) -> Option<StreamSidebandEvent> {
+        None
+    }
+}
+
 #[embassy_executor::main]
-async fn main(_spawner: embassy_executor::Spawner) {
-    init_ram::init_ram();
-    info!("nucleo_h743zi2 starting...");
-    
-    let p = embassy_stm32::init(embassy_stm32::Config::default());
-    init::init();
+async fn main(spawner: embassy_executor::Spawner) {
+    info!("cannify_micro_g0b1cetxn starting...");
+
+    let mut config = Config::default();
+    {
+        use embassy_stm32::rcc::*;
+        config.rcc.hsi = Some(HSIPrescaler::DIV1);
+        config.rcc.csi = true;
+        config.rcc.hsi48 = Some(Hsi48Config { sync_from_usb: true }); // needed for USB
+        config.rcc.pll1 = Some(Pll {
+            source: PllSource::HSI,
+            prediv: PllPreDiv::DIV4,
+            mul: PllMul::MUL50,
+            divp: Some(PllDiv::DIV2),
+            divq: None,
+            divr: None,
+        });
+        config.rcc.sys = Sysclk::PLL1_P; // 400 Mhz
+        config.rcc.ahb_pre = AHBPrescaler::DIV2; // 200 Mhz
+        config.rcc.apb1_pre = APBPrescaler::DIV2; // 100 Mhz
+        config.rcc.apb2_pre = APBPrescaler::DIV2; // 100 Mhz
+        config.rcc.apb3_pre = APBPrescaler::DIV2; // 100 Mhz
+        config.rcc.apb4_pre = APBPrescaler::DIV2; // 100 Mhz
+        config.rcc.voltage_scale = VoltageScale::Scale1;
+        config.rcc.mux.usbsel = mux::Usbsel::HSI48;
+    }
+    let p = embassy_stm32::init(config);
     init::reset_bkp_domain();
     info!("RCC and RAM init done");
 
-    let mut cp = cortex_m::Peripherals::take().unwrap();
-    cp.SCB.enable_icache();
-    // Enable D-Cache only after verifying that no coherency issues will arise, e.g., when using DMAs
-    // DMAs write/read to/from SRAM while cache continues to hold old data, can use cache invalidate to solve this
-    // cp.SCB.enable_dcache(&mut cp.CPUID);
-    let mut led = Output::new(p.PB14, Level::Low, Speed::Low);
+    let led = Output::new(p.PE1, Level::Low, Speed::Low);
+    let state = ServerState { led };
 
-    let mut config = embassy_stm32::usb::Config::default();
-    // Do not enable vbus_detection. This is a safe default that works in all boards.
-    // However, if your USB device is self-powered (can stay powered on if USB is unplugged), you need
-    // to enable vbus_detection to comply with the USB spec. If you enable it, the board
-    // has to support it or USB won't work at all. See docs on `vbus_detection` for details.
-    config.vbus_detection = false;
-    let driver = Driver::new_fs(p.USB_OTG_FS, Irqs, p.PA12, p.PA11, &mut ep_out_buffer, config);
+    static EP_OUT_BUF: StaticCell<[u8; 1024]> = StaticCell::new();
+    let ep_out_buffer = EP_OUT_BUF.init([0u8; 1024]);
+    let config = embassy_stm32::usb::Config::default();
+    let driver = Driver::new_fs(p.USB_OTG_FS, Irqs, p.PA12, p.PA11, ep_out_buffer, config);
+    let buffers = USB_BUFFERS.init(UsbBuffers::default());
+    let (usb_server, tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), |config| {
+        config.serial_number = Some(embassy_stm32::uid::uid_hex());
+    });
+    unwrap!(spawner.spawn(usb_server_task(usb_server)));
 
-    info!("Init done");
+    info!("init done");
     loop {
-        info!("LED ON");
-        led.set_high();
+        info!("loop");
         Timer::after_millis(2000).await;
-
-        info!("LED OFF");
-        led.set_low();
-        Timer::after_millis(2000).await;
+        _ = tx.try_send(());
     }
 }
 
@@ -61,13 +166,7 @@ unsafe fn DefaultHandler(irqn: i16) {
 
 #[exception]
 unsafe fn HardFault(ef: &cortex_m_rt::ExceptionFrame) -> ! {
-    error!("HardFault {}", defmt::Debug2Format(ef));
+    error!("HardFault {}", Debug2Format(ef));
 
     loop {}
 }
-
-//NonMaskableInt (CSS?)
-// NOTE that at this point we don't check if the exception is available on the target (e.g.
-// MemoryManagement is not available on Cortex-M0)
-// "MemoryManagement" | "BusFault" | "UsageFault" | "SecureFault" | "SVCall"
-// | "DebugMonitor" | "PendSV" | "SysTick" => {

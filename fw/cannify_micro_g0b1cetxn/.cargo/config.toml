@@ -1,6 +1,5 @@
 [target.thumbv6m-none-eabi]
-#runner = "probe-rs run --chip STM32G0B1CE"
-runner = "/Users/roman/git/rockface/target/debug/rockface --run-elf"
+runner = "probe-rs run --chip STM32G0B1CE"
 
 [build]
 target = "thumbv6m-none-eabi"

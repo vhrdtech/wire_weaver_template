@@ -22,12 +22,15 @@ embassy-executor = { version = "0.9.1", features = [
 embassy-time = { version = "0.5.0", features = ["defmt", "defmt-timestamp-uptime", "tick-hz-32_768"] }
 embassy-sync = { version = "0.7.2", features = ["defmt"] }
 embassy-usb = { version = "0.5", features = ["defmt"] }
+static_cell = "2.1"
 
+api = { path = "../../api" }
 wire_weaver_usb_embassy = { path = "../../../wire_weaver/wire_weaver_usb_embassy" }
 wire_weaver_usb_link = { path = "../../../wire_weaver/wire_weaver_usb_link", features = ["device", "defmt"] }
 wire_weaver = { path = "../../../wire_weaver/wire_weaver", default-features = false, features = [
     "defmt",
 ] }
+ww_client_server = { path = "../../../wire_weaver/ww_client_server", default-features = false }
 
 # see for more info: https://docs.rust-embedded.org/book/unsorted/speed-vs-size.html
 # cargo build/run

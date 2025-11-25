@@ -39,6 +39,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a23eb6b1614318a8071c9b2521f36b424b2c83db5eb3a0fead4a6c0809af6e61"
 
 [[package]]
+name = "api"
+version = "0.1.0"
+dependencies = [
+ "wire_weaver",
+]
+
+[[package]]
 name = "as-slice"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -785,6 +792,7 @@ checksum = "8d5439c4ad607c3c23abf66de8c8bf57ba8adcd1f129e699851a6e43935d339d"
 name = "nucleo_h743zi2"
 version = "0.1.0"
 dependencies = [
+ "api",
  "cortex-m",
  "cortex-m-rt",
  "defmt 1.0.1",
@@ -795,9 +803,11 @@ dependencies = [
  "embassy-time",
  "embassy-usb",
  "panic-probe",
+ "static_cell",
  "wire_weaver",
  "wire_weaver_usb_embassy",
  "wire_weaver_usb_link",
+ "ww_client_server",
 ]
 
 [[package]]
@@ -1090,6 +1100,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
+name = "static_cell"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0530892bb4fa575ee0da4b86f86c667132a94b74bb72160f58ee5a4afec74c23"
+dependencies = [
+ "portable-atomic",
+]
+
+[[package]]
 name = "stm32-fmc"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1304,11 +1323,9 @@ name = "wire_weaver"
 version = "0.4.0"
 dependencies = [
  "defmt 1.0.1",
- "pathsearch",
  "shrink_wrap",
- "subprocess",
- "wire_weaver_core",
  "wire_weaver_derive",
+ "ww_version",
 ]
 
 [[package]]
@@ -1347,7 +1364,10 @@ version = "0.4.0"
 dependencies = [
  "defmt 1.0.1",
  "embassy-futures",
+ "embassy-sync",
+ "embassy-time",
  "embassy-usb",
+ "wire_weaver",
  "wire_weaver_usb_link",
 ]
 
@@ -1360,6 +1380,24 @@ dependencies = [
  "shrink_wrap",
  "strum_macros",
  "wire_weaver",
+]
+
+[[package]]
+name = "ww_client_server"
+version = "0.1.0"
+dependencies = [
+ "shrink_wrap",
+ "wire_weaver_derive",
+ "ww_version",
+]
+
+[[package]]
+name = "ww_version"
+version = "0.1.0"
+dependencies = [
+ "defmt 1.0.1",
+ "shrink_wrap",
+ "wire_weaver_derive",
 ]
 
 [[package]]

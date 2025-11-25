@@ -1,4 +1,3 @@
-use std::time::Duration;
 use anyhow::Result;
 use driver::{OnError, MyDeviceDriver, DeviceFilter, LedState};
 use clap::Parser;

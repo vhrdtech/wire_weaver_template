@@ -1,7 +1,7 @@
 # wire_weaver_template
 
-This template showcases how to use WireWeaver on real hardware, connected via USB. Only basic functionality is used to
-keep things simple.
+This template showcases how to use [WireWeaver](https://github.com/vhrdtech/wire_weaver) on real hardware, connected via USB.
+Only basic functionality is used to keep things simple.
 
 ## Overview
 * `api` - Common data types and API description, used by fw driver crates.

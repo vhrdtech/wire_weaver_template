@@ -42,11 +42,11 @@ async fn main() -> Result<()> {
         match rl.read_command() {
             ReadCommandOutput::Command(c) => match c {
                 Command::Connect => {
-                    let target = DeviceFilter::UsbVidPid {
+                    let filter = DeviceFilter::UsbVidPid {
                         vid: 0xc0de,
                         pid: 0xcafe,
                     };
-                    match MyDeviceDriver::connect(target, OnError::ExitImmediately).await {
+                    match MyDeviceDriver::connect(filter, OnError::ExitImmediately).await {
                         Ok(d) => {
                             info!("Connected!");
                             driver = Some(d);

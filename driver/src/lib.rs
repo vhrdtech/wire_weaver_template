@@ -3,7 +3,7 @@ use std::time::Duration;
 use tokio::sync::{mpsc, oneshot, RwLock};
 use wire_weaver_client_common::{Command, CommandSender, Error};
 use wire_weaver_usb_host::{usb_worker, ConnectionInfo};
-use wire_weaver::{ww_api, ProtocolInfo};
+use wire_weaver::{ww_api, ww_version::FullVersion};
 pub use wire_weaver_client_common::{OnError};
 pub use wire_weaver_client_common::DeviceFilter;
 pub use api::LedState;
@@ -24,6 +24,7 @@ impl MyDeviceDriver {
             device,
             on_error,
             conn_state.clone(),
+            api::DEVICE_API_ROOT_FULL_GID
         )?;
         let connection_result = connected_rx.await.map_err(|_| Error::EventLoopNotRunning)?;
         connection_result?;
@@ -50,13 +51,9 @@ fn start_ws_worker(
     filter: DeviceFilter,
     on_error: OnError,
     conn_state: Arc<RwLock<ConnectionInfo>>,
+    user_protocol: FullVersion<'static>,
 ) -> Result<mpsc::UnboundedSender<Command>, Error> {
     let (cmd_tx, cmd_rx) = mpsc::unbounded_channel();
-    let user_protocol = ProtocolInfo {
-        protocol_id: 13,
-        major_version: 0,
-        minor_version: 1,
-    };
     tokio::spawn(async move {
         usb_worker(cmd_rx, conn_state, user_protocol, 64).await;
     });

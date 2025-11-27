@@ -120,7 +120,7 @@ async fn main(spawner: embassy_executor::Spawner) {
 
     let driver = Driver::new(p.USB, Irqs, p.PA12, p.PA11);
     let buffers = USB_BUFFERS.init(UsbBuffers::default());
-    let (usb_server, tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), |config| {
+    let (usb_server, tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), api::DEVICE_API_ROOT_FULL_GID, |config| {
         config.serial_number = Some(embassy_stm32::uid::uid_hex());
     });
     unwrap!(spawner.spawn(usb_server_task(usb_server)));

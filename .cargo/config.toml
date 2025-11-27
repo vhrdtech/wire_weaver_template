@@ -1,0 +1,2 @@
+[alias]
+repl = "run -p driver --example repl"

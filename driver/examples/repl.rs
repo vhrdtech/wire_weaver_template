@@ -1,3 +1,4 @@
+use std::time::Duration;
 use anyhow::Result;
 use driver::{OnError, MyDeviceDriver, DeviceFilter, LedState};
 use clap::Parser;
@@ -14,21 +15,36 @@ enum Command {
 
     LedOn,
     LedOff,
+    Blink { count: u32, delay_ms: u32 },
     // Add your commands here.
     // Arguments can be added like so: MyCommand { x: f32 },
 }
 
-async fn handle_command(driver: &mut MyDeviceDriver, cmd: Command) -> Result<()> {
+async fn handle_command(device: &mut MyDeviceDriver, cmd: Command) -> Result<()> {
     match cmd {
         Command::LedOn => {
-            driver.root()
+            device.root()
                 .set_led_state(LedState::On)
                 .await?;
         }
         Command::LedOff => {
-            driver.root()
+            device.root()
                 .set_led_state(LedState::Off)
                 .await?;
+        }
+        Command::Blink { count, delay_ms } => {
+            for _ in 0..count {
+                println!("On");
+                device.root()
+                    .set_led_state(LedState::On)
+                    .await?;
+                tokio::time::sleep(Duration::from_millis(delay_ms as u64)).await;
+                println!("Off");
+                device.root()
+                    .set_led_state(LedState::Off)
+                    .await?;
+                tokio::time::sleep(Duration::from_millis(delay_ms as u64)).await;
+            }
         }
         // Handle additional commands here
 
@@ -48,33 +64,33 @@ async fn connect_to_device() -> Result<MyDeviceDriver> {
     Ok(device)
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
-    let mut driver = None;
+    let mut device = None;
     let mut rl = setup_repl();
 
     loop {
-        let should_exit = handle_user_command(&mut driver, &mut rl).await?;
+        let should_exit = handle_user_command(&mut device, &mut rl).await?;
         if should_exit {
             break;
         }
     }
 
-    if let Some(d) = driver.as_mut() {
+    if let Some(d) = device.as_mut() {
         d.disconnect_and_exit().await?;
     }
     Ok(())
 }
 
-async fn handle_user_command(driver: &mut Option<MyDeviceDriver>, rl: &mut ClapEditor<Command>) -> Result<bool> {
+async fn handle_user_command(device: &mut Option<MyDeviceDriver>, rl: &mut ClapEditor<Command>) -> Result<bool> {
     match rl.read_command() {
         ReadCommandOutput::Command(c) => match c {
             Command::Connect => {
                 match connect_to_device().await {
                     Ok(d) => {
                         info!("Connected!");
-                        *driver = Some(d);
+                        *device = Some(d);
                     }
                     Err(e) => {
                         error!("{}", e);
@@ -82,7 +98,7 @@ async fn handle_user_command(driver: &mut Option<MyDeviceDriver>, rl: &mut ClapE
                 }
             }
             Command::Disconnect => {
-                if let Some(mut d) = driver.take() {
+                if let Some(mut d) = device.take() {
                     d.disconnect_and_exit().await?;
                     info!("Disconnected!");
                 } else {
@@ -91,14 +107,14 @@ async fn handle_user_command(driver: &mut Option<MyDeviceDriver>, rl: &mut ClapE
             }
             Command::Exit => return Ok(true),
             c => {
-                let Some(d) = driver.as_mut() else {
+                let Some(d) = device.as_mut() else {
                     println!("{}", style("No connection, connect first").yellow());
-                    return Ok(true);
+                    return Ok(false);
                 };
                 let r = handle_command(d, c).await;
                 match r {
-                    Ok(_) => println!("{}", style("ok").green()),
-                    Err(e) => println!("{}", style(e).red()),
+                    Ok(_) => info!("ok"),
+                    Err(e) => error!("{e}"),
                 }
             }
         },

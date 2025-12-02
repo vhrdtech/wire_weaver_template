@@ -99,8 +99,12 @@ async fn handle_user_command(device: &mut Option<MyDeviceDriver>, rl: &mut ClapE
             }
             Command::Disconnect => {
                 if let Some(mut d) = device.take() {
-                    d.disconnect_and_exit().await?;
-                    info!("Disconnected!");
+                    let r = d.disconnect_and_exit().await;
+                    if r.is_ok() {
+                        info!("Disconnect: {r:?}");
+                    } else {
+                        error!("Disconnect: {r:?}");
+                    }
                 } else {
                     info!("Already disconnected");
                 }

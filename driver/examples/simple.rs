@@ -4,6 +4,8 @@ use anyhow::Result;
 
 #[tokio::main]
 async fn main()-> Result<()> {
+    tracing_subscriber::fmt::init();
+
     let filter = DeviceFilter::UsbVidPid {
         vid: 0xc0de,
         pid: 0xcafe,
@@ -17,6 +19,8 @@ async fn main()-> Result<()> {
 
     println!("Turning LED off");
     driver.root().set_led_state(LedState::Off).await?;
+
+    driver.disconnect_and_exit().await?;
 
     Ok(())
 }

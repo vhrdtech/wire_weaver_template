@@ -55,7 +55,7 @@ fn start_ws_worker(
 ) -> Result<mpsc::UnboundedSender<Command>, Error> {
     let (cmd_tx, cmd_rx) = mpsc::unbounded_channel();
     tokio::spawn(async move {
-        usb_worker(cmd_rx, conn_state, user_protocol, 64).await;
+        usb_worker(cmd_rx, conn_state, user_protocol).await;
     });
     cmd_tx
         .send(Command::Connect {

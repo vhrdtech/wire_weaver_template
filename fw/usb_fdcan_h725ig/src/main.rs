@@ -11,10 +11,11 @@ use defmt_rtt as _;
 use embassy_stm32::{
     Config, bind_interrupts,
     gpio::{Level, Output, Speed},
-    peripherals::USB_OTG_FS,
+    peripherals::USB_OTG_HS,
     usb,
     usb::Driver,
 };
+use embassy_stm32::time::mhz;
 use embassy_time::Timer;
 use panic_probe as _;
 use static_cell::StaticCell;
@@ -24,15 +25,15 @@ use wire_weaver_usb_embassy::{UsbBuffers, UsbServer, UsbTimings, usb_init};
 use ww_client_server::{StreamSidebandCommand, StreamSidebandEvent};
 
 bind_interrupts!(struct Irqs {
-    OTG_FS => usb::InterruptHandler<USB_OTG_FS>;
+    OTG_HS => usb::InterruptHandler<USB_OTG_HS>;
 });
 
-const MAX_USB_PACKET_LEN: usize = 64; // 64 for FullSpeed, 1024 for HighSpeed
-const MAX_MESSAGE_LEN: usize = 1024; // Maximum WireWeaver message length
+const MAX_USB_PACKET_LEN: usize = 1024; // 64 for FullSpeed, 1024 for HighSpeed
+const MAX_MESSAGE_LEN: usize = 4096; // Maximum WireWeaver message length
 static USB_BUFFERS: StaticCell<UsbBuffers<MAX_USB_PACKET_LEN, MAX_MESSAGE_LEN>> = StaticCell::new();
 
 #[embassy_executor::task]
-async fn usb_server_task(mut usb_server: UsbServer<'static, Driver<'static, USB_OTG_FS>, ServerState>) {
+async fn usb_server_task(mut usb_server: UsbServer<'static, Driver<'static, USB_OTG_HS>, ServerState>) {
     usb_server.run().await;
 }
 
@@ -68,7 +69,7 @@ impl WireWeaverAsyncApiBackend for ServerState {
 }
 
 struct ServerState {
-    led: Output<'static>,
+    leds: [Output<'static>; 2]
 }
 
 ww_api!(
@@ -82,8 +83,16 @@ ww_api!(
 impl ServerState {
     async fn set_led_state(&mut self, state: LedState) {
         match state {
-            LedState::Off => self.led.set_low(),
-            LedState::On => self.led.set_high(),
+            LedState::Off => {
+                for led in &mut self.leds {
+                    led.set_low();
+                }
+            },
+            LedState::On => {
+                for led in &mut self.leds {
+                    led.set_high();
+                }
+            }
             LedState::Blinking => {}
         }
     }
@@ -114,39 +123,78 @@ async fn main(spawner: embassy_executor::Spawner) {
     let mut config = Config::default();
     {
         use embassy_stm32::rcc::*;
-        config.rcc.hsi = Some(HSIPrescaler::DIV1);
-        config.rcc.csi = true;
-        config.rcc.hsi48 = Some(Hsi48Config { sync_from_usb: true }); // needed for USB
-        config.rcc.pll1 = Some(Pll {
-            source: PllSource::HSI,
-            prediv: PllPreDiv::DIV4,
-            mul: PllMul::MUL50,
-            divp: Some(PllDiv::DIV2),
-            divq: None,
-            divr: None,
+        config.rcc.hsi = None;
+        config.rcc.csi = false;
+        config.rcc.hse = Some(Hse {
+            freq: mhz(24),
+            mode: HseMode::Bypass,
         });
-        config.rcc.sys = Sysclk::PLL1_P; // 400 Mhz
-        config.rcc.ahb_pre = AHBPrescaler::DIV2; // 200 Mhz
-        config.rcc.apb1_pre = APBPrescaler::DIV2; // 100 Mhz
-        config.rcc.apb2_pre = APBPrescaler::DIV2; // 100 Mhz
-        config.rcc.apb3_pre = APBPrescaler::DIV2; // 100 Mhz
-        config.rcc.apb4_pre = APBPrescaler::DIV2; // 100 Mhz
-        config.rcc.voltage_scale = VoltageScale::Scale1;
-        config.rcc.mux.usbsel = mux::Usbsel::HSI48;
+        config.rcc.hsi48 = None;
+        config.rcc.pll1 = Some(Pll {
+            source: PllSource::HSE,
+            prediv: PllPreDiv::DIV2,
+            mul: PllMul::MUL45,
+            divp: Some(PllDiv::DIV1),
+            divq: Some(PllDiv::DIV4),
+            divr: Some(PllDiv::DIV2),
+        });
+        config.rcc.pll3 = Some(Pll {
+            source: PllSource::HSE,
+            prediv: PllPreDiv::DIV2,
+            mul: PllMul::MUL16,
+            divp: Some(PllDiv::DIV2),
+            divq: Some(PllDiv::DIV4), // 48MHz
+            divr: Some(PllDiv::DIV4),
+        });
+        config.rcc.sys = Sysclk::PLL1_P; // 540MHz
+        config.rcc.d1c_pre = AHBPrescaler::DIV2;
+        config.rcc.ahb_pre = AHBPrescaler::DIV2;
+        config.rcc.apb1_pre = APBPrescaler::DIV2;
+        config.rcc.apb2_pre = APBPrescaler::DIV2;
+        config.rcc.apb3_pre = APBPrescaler::DIV2;
+        config.rcc.apb4_pre = APBPrescaler::DIV2;
+        config.rcc.voltage_scale = VoltageScale::Scale0;
+        config.rcc.supply_config = SupplyConfig::DirectSMPS;
+        config.rcc.mux.fdcansel = mux::Fdcansel::PLL1_Q;
+        config.rcc.mux.usbsel = mux::Usbsel::PLL3_Q;
+        config.rcc.mux.adcsel = mux::Adcsel::PLL3_R;
+        config.rcc.mux.sdmmcsel = mux::Sdmmcsel::PLL1_Q;
     }
     let p = embassy_stm32::init(config);
     init::reset_bkp_domain();
     info!("RCC and RAM init done");
 
-    let led = Output::new(p.PE1, Level::Low, Speed::Low);
-    let state = ServerState { led };
+    let led_b125 = Output::new(p.PF5, Level::Low, Speed::Low);
+    let led_b135 = Output::new(p.PC6, Level::Low, Speed::Low);
+    let state = ServerState { leds: [led_b125, led_b135] };
 
-    static EP_OUT_BUF: StaticCell<[u8; MAX_USB_PACKET_LEN]> = StaticCell::new();
-    let ep_out_buffer = EP_OUT_BUF.init([0u8; MAX_USB_PACKET_LEN]);
-    let config = embassy_stm32::usb::Config::default();
-    let driver = Driver::new_fs(p.USB_OTG_FS, Irqs, p.PA12, p.PA11, ep_out_buffer, config);
+    let _ulpi_rst_n = Output::new(p.PH3, Level::High, Speed::Low); // do not drop
+    let _usb_mux_n = Output::new(p.PH5, Level::Low, Speed::Low); // do not drop
+
+    static EP_OUT_BUF: StaticCell<[u8; 2048]> = StaticCell::new();
+    let ep_out_buffer = EP_OUT_BUF.init([0u8; 2048]);
+    let config = usb::Config::default();
+    let driver = Driver::new_hs_ulpi(
+        p.USB_OTG_HS,
+        Irqs,
+        p.PA5,
+        p.PC2,
+        p.PC3,
+        p.PC0,
+        p.PA3,
+        p.PB0,
+        p.PB1,
+        p.PB10,
+        p.PB11,
+        p.PB12,
+        p.PB13,
+        p.PB5,
+        ep_out_buffer,
+        config,
+    );
+
     let buffers = USB_BUFFERS.init(UsbBuffers::default());
-    let (usb_server, _tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), api::DEVICE_API_ROOT_FULL_GID, |config| {
+    let (usb_server, _tx) = usb_init(driver, buffers, state, UsbTimings::default_hs(), api::DEVICE_API_ROOT_FULL_GID, |config| {
         config.serial_number = Some(embassy_stm32::uid::uid_hex());
     });
     unwrap!(spawner.spawn(usb_server_task(usb_server)));

@@ -82,6 +82,7 @@ ww_api!(
 
 impl ServerState {
     async fn set_led_state(&mut self, state: LedState) {
+        info!("set_led state {:?}", state);
         match state {
             LedState::Off => {
                 for led in &mut self.leds {

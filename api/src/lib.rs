@@ -14,6 +14,7 @@ pub trait DeviceApiRoot {
 }
 
 #[derive_shrink_wrap]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[ww_repr(unib32)]
 pub enum LedState {
     Off,

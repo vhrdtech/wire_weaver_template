@@ -8,6 +8,7 @@ Only basic functionality is used to keep things simple.
 * `fw` - Example firmwares for several development boards with USB support.
   * `fw/nucleo_h743zi2` - works on Nucleo H743ZI2 and H753ZI boards
   * `fw/cannify_micro_g0b1cetxn` - vhrd.tech internal dev board, but can be easily adapted to STM32G0 boards
+  * Any other board with USB supported by embassy should work as well! The only dependency is on embassy-usb.
 * `driver` - Rust driver with API client.
   * `driver/examples/simple` - Basic API client usage example.
   * `driver/examples/repl` - REPL based on clap, supports command history and auto-complete.

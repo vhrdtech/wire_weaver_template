@@ -1106,10 +1106,30 @@ dependencies = [
 
 [[package]]
 name = "shrink_wrap"
-version = "0.4.0"
+version = "0.1.0"
 dependencies = [
  "defmt 1.0.1",
  "paste",
+ "shrink_wrap_derive",
+]
+
+[[package]]
+name = "shrink_wrap_core"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.108",
+]
+
+[[package]]
+name = "shrink_wrap_derive"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "shrink_wrap_core",
+ "syn 2.0.108",
 ]
 
 [[package]]
@@ -1375,6 +1395,7 @@ dependencies = [
  "quote",
  "regex",
  "shrink_wrap",
+ "shrink_wrap_core",
  "syn 2.0.108",
 ]
 

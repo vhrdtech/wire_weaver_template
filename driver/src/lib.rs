@@ -22,7 +22,7 @@ impl MyDeviceDriver {
 
 ww_api!(
     "../api/src/lib.rs" as api::DeviceApiRoot for MyDeviceDriver,
-    client = "async_worker",
+    client = "async_worker+usb",
     no_alloc = true,
     use_async = true,
     //derive = "Debug",

@@ -1730,6 +1730,8 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 [[package]]
 name = "wire_weaver"
 version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "788df75c05aba70635a3bf573efa66ac9a0bc0eced82c7c557308a6ce57a6fd7"
 dependencies = [
  "defmt",
  "shrink_wrap",
@@ -1739,7 +1741,9 @@ dependencies = [
 
 [[package]]
 name = "wire_weaver_client_common"
-version = "0.4.0"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b54e9277a4237edcbcc66347578217b235b4132fe571eace6f069ca024f98954"
 dependencies = [
  "thiserror 2.0.17",
  "tokio",
@@ -1752,6 +1756,8 @@ dependencies = [
 [[package]]
 name = "wire_weaver_core"
 version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "469573c498ceb3ac48e40af367745e72b3c0fd6d8f17b3ce6872814199a9728d"
 dependencies = [
  "anyhow",
  "convert_case",
@@ -1769,6 +1775,8 @@ dependencies = [
 [[package]]
 name = "wire_weaver_derive"
 version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e1afbed004f2db88e8f3dba8954504b37c96ce466aa40f4ef4987291bb8710d"
 dependencies = [
  "convert_case",
  "darling",
@@ -1783,7 +1791,9 @@ dependencies = [
 
 [[package]]
 name = "wire_weaver_usb_host"
-version = "0.0.0"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5997e0b4659e4095814978d178b960384d0c187c5619688e2f6110567e148b3c"
 dependencies = [
  "futures-lite",
  "nusb",
@@ -1798,7 +1808,9 @@ dependencies = [
 
 [[package]]
 name = "wire_weaver_usb_link"
-version = "0.4.0"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c2af08cab24539778dbdeba0a7ccf874346d7d746968eefbaf54a7fc5b915900"
 dependencies = [
  "crc",
  "shrink_wrap",
@@ -1816,6 +1828,8 @@ checksum = "f17a85883d4e6d00e8a97c586de764dabcc06133f7f1d55dce5cdc070ad7fe59"
 [[package]]
 name = "ww_client_server"
 version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4d0a343686e581e08b8628d09e7b8430da362339630b9d9fece9f7eac359252"
 dependencies = [
  "wire_weaver",
 ]

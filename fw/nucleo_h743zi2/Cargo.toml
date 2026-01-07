@@ -25,12 +25,10 @@ embassy-usb = { version = "0.5", features = ["defmt"] }
 static_cell = "2.1"
 
 api = { path = "../../api" }
-wire_weaver_usb_embassy = { path = "../../../wire_weaver/wire_weaver_usb_embassy" }
-wire_weaver_usb_link = { path = "../../../wire_weaver/wire_weaver_usb_link", features = ["device", "defmt"] }
-wire_weaver = { path = "../../../wire_weaver/wire_weaver", default-features = false, features = [
-    "defmt",
-] }
-ww_client_server = { path = "../../../ww_stdlib/ww_client_server", default-features = false }
+wire_weaver_usb_embassy = { version = "0.1.0" }
+wire_weaver_usb_link = { version = "0.1.0", features = ["device", "defmt"] }
+wire_weaver = { version = "0.4.0", default-features = false, features = ["defmt"] }
+ww_client_server = { version = "0.1.0", default-features = false }
 
 # to solve "can't find crate for test on IntelliJ"
 [[bin]]

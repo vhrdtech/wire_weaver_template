@@ -30,7 +30,7 @@ wire_weaver_usb_link = { path = "../../../wire_weaver/wire_weaver_usb_link", fea
 wire_weaver = { path = "../../../wire_weaver/wire_weaver", default-features = false, features = [
     "defmt",
 ] }
-ww_client_server = { path = "../../../wire_weaver/ww_client_server", default-features = false }
+ww_client_server = { path = "../../../ww_stdlib/ww_client_server", default-features = false }
 
 # to solve "can't find crate for test on IntelliJ"
 [[bin]]

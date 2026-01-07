@@ -54,7 +54,7 @@ impl WireWeaverAsyncApiBackend for ServerState {
         scratch_value: &mut [u8],
         scratch_event: &mut [u8],
     ) {
-        let message = api_impl::usart_rx_data_ser(
+        let message = api_impl::stream_data_ser().usart_rx(
             &RefVec::new_bytes(&[0, 1, 2, 3, 4]),
             scratch_value,
             scratch_event,

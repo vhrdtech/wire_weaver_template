@@ -28,6 +28,7 @@ bind_interrupts!(struct Irqs {
 });
 
 const MAX_USB_PACKET_LEN: usize = 64; // 64 for FullSpeed, 1024 for HighSpeed
+const EP_OUT_BUF_LEN: usize = MAX_USB_PACKET_LEN * wire_weaver_usb_embassy::ENDPOINTS_USED;
 const MAX_MESSAGE_LEN: usize = 1024; // Maximum WireWeaver message length
 static USB_BUFFERS: StaticCell<UsbBuffers<MAX_USB_PACKET_LEN, MAX_MESSAGE_LEN>> = StaticCell::new();
 
@@ -142,13 +143,14 @@ async fn main(spawner: embassy_executor::Spawner) {
     let led = Output::new(p.PE1, Level::Low, Speed::Low);
     let state = ServerState { led };
 
-    static EP_OUT_BUF: StaticCell<[u8; MAX_USB_PACKET_LEN]> = StaticCell::new();
-    let ep_out_buffer = EP_OUT_BUF.init([0u8; MAX_USB_PACKET_LEN]);
-    let config = embassy_stm32::usb::Config::default();
+    static EP_OUT_BUF: StaticCell<[u8; EP_OUT_BUF_LEN]> = StaticCell::new();
+    let ep_out_buffer = EP_OUT_BUF.init([0u8; EP_OUT_BUF_LEN]);
+    let config = usb::Config::default();
     let driver = Driver::new_fs(p.USB_OTG_FS, Irqs, p.PA12, p.PA11, ep_out_buffer, config);
     let buffers = USB_BUFFERS.init(UsbBuffers::default());
     let (usb_server, _tx) = usb_init(driver, buffers, state, UsbTimings::default_fs(), api::DEVICE_API_ROOT_FULL_GID, |config| {
         config.serial_number = Some(embassy_stm32::uid::uid_hex());
+        // optionally set config.manufacturer, config.product, self_powered and max_power
     });
     unwrap!(spawner.spawn(usb_server_task(usb_server)));
 

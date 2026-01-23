@@ -29,6 +29,7 @@ bind_interrupts!(struct Irqs {
 });
 
 const MAX_USB_PACKET_LEN: usize = 1024; // 64 for FullSpeed, 1024 for HighSpeed
+const EP_OUT_BUF_LEN: usize = MAX_USB_PACKET_LEN * wire_weaver_usb_embassy::ENDPOINTS_USED;
 const MAX_MESSAGE_LEN: usize = 4096; // Maximum WireWeaver message length
 static USB_BUFFERS: StaticCell<UsbBuffers<MAX_USB_PACKET_LEN, MAX_MESSAGE_LEN>> = StaticCell::new();
 
@@ -172,8 +173,8 @@ async fn main(spawner: embassy_executor::Spawner) {
     let _ulpi_rst_n = Output::new(p.PH3, Level::High, Speed::Low); // do not drop
     let _usb_mux_n = Output::new(p.PH5, Level::Low, Speed::Low); // do not drop
 
-    static EP_OUT_BUF: StaticCell<[u8; 2048]> = StaticCell::new();
-    let ep_out_buffer = EP_OUT_BUF.init([0u8; 2048]);
+    static EP_OUT_BUF: StaticCell<[u8; EP_OUT_BUF_LEN]> = StaticCell::new();
+    let ep_out_buffer = EP_OUT_BUF.init([0u8; EP_OUT_BUF_LEN]);
     let config = usb::Config::default();
     let driver = Driver::new_hs_ulpi(
         p.USB_OTG_HS,

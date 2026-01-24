@@ -431,7 +431,9 @@ dependencies = [
 name = "driver_py"
 version = "0.1.0"
 dependencies = [
+ "driver",
  "pyo3",
+ "tokio",
 ]
 
 [[package]]

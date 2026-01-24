@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 use tokio::runtime::Runtime;
 
 #[pymodule]
-fn driver_py(py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn driver_py(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<DriverPy>()?;
     Ok(())
 }
@@ -39,7 +39,6 @@ impl DriverPy {
     }
 
     pub fn led_on(&mut self) -> PyResult<()> {
-        let _guard = self.runtime.enter();
         let Some(drv) = &mut self.drv else {
             return Err(PyTypeError::new_err("Not connected, use connect() first"));
         };
@@ -50,7 +49,6 @@ impl DriverPy {
     }
 
     pub fn led_off(&mut self) -> PyResult<()> {
-        let _guard = self.runtime.enter();
         let Some(drv) = &mut self.drv else {
             return Err(PyTypeError::new_err("Not connected, use connect() first"));
         };

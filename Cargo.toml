@@ -4,9 +4,17 @@ resolver = "3"
 members = [
   "api",
   "driver",
+  "driver_py",
 ]
 
 exclude = ["fw"]
 
 [workspace.dependencies]
 wire_weaver = { version = "0.4.0", default-features = false }
+
+[patch.crates-io]
+wire_weaver = { path = "../wire_weaver/wire_weaver" }
+#wire_weaver_core = { path = "../../../wire_weaver/wire_weaver_core" }
+wire_weaver_usb_host = { path = "../wire_weaver/wire_weaver_usb_host" }
+wire_weaver_client_common = { path = "../wire_weaver/wire_weaver_client_common" }
+ww_version = { path = "../ww_stdlib/ww_version" }

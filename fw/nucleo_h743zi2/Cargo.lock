@@ -1135,8 +1135,6 @@ dependencies = [
 [[package]]
 name = "shrink_wrap"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd4d5544e7fab749f6a633e1e2073315af03b4b36d5897d56a3fe8d8664ccaf5"
 dependencies = [
  "defmt 1.0.1",
  "paste",
@@ -1145,9 +1143,7 @@ dependencies = [
 
 [[package]]
 name = "shrink_wrap_core"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e57377771bb843baa3ba7763c412de4f3ef1a8cb3101834dea8ffe85f88f57eb"
+version = "0.2.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1157,8 +1153,6 @@ dependencies = [
 [[package]]
 name = "shrink_wrap_derive"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3d17e8bba341ba3c0d78858d5e15678a442997f91400cae28ec491a0d8a90b0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1421,8 +1415,6 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 [[package]]
 name = "wire_weaver"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "788df75c05aba70635a3bf573efa66ac9a0bc0eced82c7c557308a6ce57a6fd7"
 dependencies = [
  "defmt 1.0.1",
  "shrink_wrap",
@@ -1433,8 +1425,6 @@ dependencies = [
 [[package]]
 name = "wire_weaver_core"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "469573c498ceb3ac48e40af367745e72b3c0fd6d8f17b3ce6872814199a9728d"
 dependencies = [
  "anyhow",
  "convert_case",
@@ -1452,8 +1442,6 @@ dependencies = [
 [[package]]
 name = "wire_weaver_derive"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e1afbed004f2db88e8f3dba8954504b37c96ce466aa40f4ef4987291bb8710d"
 dependencies = [
  "convert_case",
  "darling 0.23.0",
@@ -1468,9 +1456,7 @@ dependencies = [
 
 [[package]]
 name = "wire_weaver_usb_embassy"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29ad85e6998c430582a3f761326db15275398a1a78223cd788da400f1f66fc4a"
+version = "0.1.1"
 dependencies = [
  "defmt 1.0.1",
  "embassy-futures",
@@ -1484,8 +1470,6 @@ dependencies = [
 [[package]]
 name = "wire_weaver_usb_link"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2af08cab24539778dbdeba0a7ccf874346d7d746968eefbaf54a7fc5b915900"
 dependencies = [
  "crc",
  "defmt 1.0.1",
@@ -1498,8 +1482,6 @@ dependencies = [
 [[package]]
 name = "ww_client_server"
 version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4d0a343686e581e08b8628d09e7b8430da362339630b9d9fece9f7eac359252"
 dependencies = [
  "wire_weaver",
 ]
@@ -1507,8 +1489,6 @@ dependencies = [
 [[package]]
 name = "ww_global"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df985ee503d08215fb23c25c2ca196ad2c619ca6782f2906a89e5c5e42f8898d"
 dependencies = [
  "convert_case",
  "serde_json",
@@ -1518,8 +1498,6 @@ dependencies = [
 [[package]]
 name = "ww_numeric"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbc027857a8916640d0c8feac18d4f3b6b30aa5d9ad1f116ca5555320746b99c"
 dependencies = [
  "shrink_wrap",
 ]
@@ -1527,8 +1505,6 @@ dependencies = [
 [[package]]
 name = "ww_self"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "544ec475007aec57e6f04dedbf1b892e411c4acc58d6989922b0f739b58be13f"
 dependencies = [
  "shrink_wrap",
  "ww_numeric",
@@ -1538,8 +1514,6 @@ dependencies = [
 [[package]]
 name = "ww_version"
 version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1003e2e70565a70a709b5d15b44b730451bc671e69b3ed39c79eec9bfc3178ca"
 dependencies = [
  "defmt 1.0.1",
  "semver 1.0.27",

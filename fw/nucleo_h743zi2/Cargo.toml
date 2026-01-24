@@ -30,6 +30,13 @@ wire_weaver_usb_link = { version = "0.1.0", features = ["device", "defmt"] }
 wire_weaver = { version = "0.4.0", default-features = false, features = ["defmt"] }
 ww_client_server = { version = "0.1.0", default-features = false }
 
+[patch.crates-io]
+wire_weaver = { path = "../../../wire_weaver/wire_weaver" }
+wire_weaver_core = { path = "../../../wire_weaver/wire_weaver_core" }
+wire_weaver_usb_embassy = { path = "../../../wire_weaver/wire_weaver_usb_embassy" }
+wire_weaver_usb_link = { path = "../../../wire_weaver/wire_weaver_usb_link" }
+ww_client_server = { path = "../../../ww_stdlib/ww_client_server" }
+
 # to solve "can't find crate for test on IntelliJ"
 [[bin]]
 name = "nucleo_h743zi2"

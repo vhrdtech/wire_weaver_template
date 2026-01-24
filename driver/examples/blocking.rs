@@ -11,19 +11,16 @@ fn main()-> Result<()> {
         .build()?;
     let _guard = runtime.enter();
 
-    let filter = DeviceFilter::UsbVidPid {
-        vid: 0xc0de,
-        pid: 0xcafe,
-    };
+    let filter = DeviceFilter::usb_vid_pid(0xc0de, 0xcafe);
     let mut driver = MyDeviceDriver::connect_blocking(filter, OnError::ExitImmediately)?;
 
     println!("Turning LED on");
-    driver.root().set_led_state_blocking(LedState::On)?;
+    driver.set_led_state(LedState::On).blocking_call()?;
 
     std::thread::sleep(Duration::from_secs(1));
 
     println!("Turning LED off");
-    driver.root().set_led_state_blocking(LedState::Off)?;
+    driver.set_led_state(LedState::Off).blocking_call()?;
 
     driver.disconnect_and_exit_blocking()?;
 

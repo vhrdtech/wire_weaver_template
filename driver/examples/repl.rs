@@ -23,25 +23,25 @@ enum Command {
 async fn handle_command(device: &mut MyDeviceDriver, cmd: Command) -> Result<()> {
     match cmd {
         Command::LedOn => {
-            device.root()
-                .set_led_state(LedState::On)
+            device
+                .set_led_state(LedState::On).call()
                 .await?;
         }
         Command::LedOff => {
-            device.root()
-                .set_led_state(LedState::Off)
+            device
+                .set_led_state(LedState::Off).call()
                 .await?;
         }
         Command::Blink { count, delay_ms } => {
             for _ in 0..count {
                 println!("On");
-                device.root()
-                    .set_led_state(LedState::On)
+                device
+                    .set_led_state(LedState::On).call()
                     .await?;
                 tokio::time::sleep(Duration::from_millis(delay_ms as u64)).await;
                 println!("Off");
-                device.root()
-                    .set_led_state(LedState::Off)
+                device
+                    .set_led_state(LedState::Off).call()
                     .await?;
                 tokio::time::sleep(Duration::from_millis(delay_ms as u64)).await;
             }
@@ -56,10 +56,7 @@ async fn handle_command(device: &mut MyDeviceDriver, cmd: Command) -> Result<()>
 }
 
 async fn connect_to_device() -> Result<MyDeviceDriver> {
-    let filter = DeviceFilter::UsbVidPid {
-        vid: 0xc0de,
-        pid: 0xcafe,
-    };
+    let filter = DeviceFilter::usb_vid_pid(0xc0de, 0xcafe);
     let device = MyDeviceDriver::connect(filter, OnError::ExitImmediately).await?;
     Ok(device)
 }

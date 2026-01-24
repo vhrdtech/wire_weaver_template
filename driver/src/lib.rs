@@ -7,7 +7,6 @@ pub use api::LedState;
 pub struct MyDeviceDriver {
     args_scratch: [u8; 4096],
     cmd_tx: CommandSender,
-    timeout: Duration,
 }
 
 impl MyDeviceDriver {
@@ -20,11 +19,14 @@ impl MyDeviceDriver {
     }
 }
 
-ww_api!(
-    "../api/src/lib.rs" as api::DeviceApiRoot for MyDeviceDriver,
-    client = "async_worker+usb",
-    no_alloc = true,
-    use_async = true,
-    //derive = "Debug",
-    debug_to_file = "../target/generated_std_client.rs"
-);
+mod api_client {
+    use super::*;
+    ww_api!(
+        "../api/src/lib.rs" as api::DeviceApiRoot for MyDeviceDriver,
+        client = "async_worker+usb",
+        no_alloc = true,
+        use_async = true,
+        //derive = "Debug",
+        debug_to_file = "../target/generated_std_client.rs"
+    );
+}

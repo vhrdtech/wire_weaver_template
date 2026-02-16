@@ -54,7 +54,7 @@ impl WireWeaverAsyncApiBackend for ServerState {
         scratch_value: &mut [u8],
         scratch_event: &mut [u8],
     ) {
-        let message = api_impl::stream_data_ser().usart_rx(
+        let message = server_impl::stream_data_ser().usart_rx(
             &RefVec::new_bytes(&[0, 1, 2, 3, 4]),
             scratch_value,
             scratch_event,
@@ -71,13 +71,15 @@ struct ServerState {
     led: Output<'static>,
 }
 
-ww_api!(
-    "../../api/src/lib.rs" as api::DeviceApiRoot for ServerState,
-    server = true, no_alloc = true, use_async = true,
-    method_model = "_=immediate",
-    property_model = "_=get_set",
-    debug_to_file = "./target/generated_no_std_server.rs" // uncomment if you want to see the resulting AST and generated code
-);
+mod server_impl {
+    wire_weaver::ww_api!(
+        "../../api/src/lib.rs" as api::DeviceApiRoot for ServerState,
+        server = true, no_alloc = true, use_async = true,
+        method_model = "_=immediate",
+        property_model = "_=get_set",
+        debug_to_file = "./target/generated_no_std_server.rs" // uncomment if you want to see the resulting AST and generated code
+    );
+}
 
 impl ServerState {
     async fn set_led_state(&mut self, state: LedState) {

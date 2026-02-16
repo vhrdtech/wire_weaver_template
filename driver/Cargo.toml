@@ -11,6 +11,9 @@ wire_weaver_usb_host = { version = "0.1.0" }
 ww_client_server = { version = "0.1.0" }
 tokio = { version = "1", features = ["sync", "rt"] }
 
+[features]
+usb-tracing = ["wire_weaver_usb_host/usb-tracing"]
+
 [dev-dependencies]
 clap = { version = "4.5", features = ["derive"] }
 clap-repl = "0.3"

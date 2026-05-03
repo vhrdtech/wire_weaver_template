@@ -8,10 +8,8 @@ use embassy_stm32::gpio::{Level, Output, Speed};
 use embassy_time::Timer;
 use panic_probe as _;
 
-
 #[embassy_executor::main]
 async fn main(_spawner: embassy_executor::Spawner) {
-    
     let p = embassy_stm32::init(embassy_stm32::Config::default());
     info!("Hello World!");
 
@@ -25,7 +23,5 @@ async fn main(_spawner: embassy_executor::Spawner) {
         info!("LED OFF");
         led.set_low();
         Timer::after_millis(2000).await;
-
-        
     }
 }

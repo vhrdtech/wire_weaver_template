@@ -4,7 +4,8 @@
 /// See: http://efton.sk/STM32/gotcha/g133.html and http://efton.sk/STM32/gotcha/g62.html
 pub(crate) fn reset_bkp_domain() {
     let rcc = embassy_stm32::pac::RCC;
-    let pwr = embassy_stm32::pac::PWR;pwr.cr1().modify(|w| w.set_dbp(true));
+    let pwr = embassy_stm32::pac::PWR;
+    pwr.cr1().modify(|w| w.set_dbp(true));
     let mut cr1 = pwr.cr1().read(); // to ensure the write went through the synchronizer
 
     rcc.bdcr().modify(|w| w.set_bdrst(true));

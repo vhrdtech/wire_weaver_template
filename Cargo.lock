@@ -503,6 +503,8 @@ dependencies = [
  "wire_weaver_client_common",
  "wire_weaver_usb_host",
  "ww_client_server 0.1.0",
+ "ww_introspect",
+ "ww_self",
 ]
 
 [[package]]
@@ -2475,6 +2477,7 @@ dependencies = [
  "tracing",
  "wire_weaver",
  "ww_client_server 0.2.0",
+ "ww_self",
  "ww_version",
 ]
 
@@ -2658,6 +2661,13 @@ dependencies = [
  "convert_case 0.10.0",
  "serde_json",
  "shrink_wrap",
+]
+
+[[package]]
+name = "ww_introspect"
+version = "0.1.0"
+dependencies = [
+ "wire_weaver",
 ]
 
 [[package]]

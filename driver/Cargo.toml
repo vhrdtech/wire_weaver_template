@@ -9,6 +9,7 @@ wire_weaver = { workspace = true }
 wire_weaver_client_common = { version = "0.1.0" }
 wire_weaver_usb_host = { version = "0.1.0" }
 ww_client_server = { version = "0.1.0" }
+ww_introspect = { path = "../../ww_stdlib/ww_introspect" }
 tokio = { version = "1", features = ["sync", "rt"] }
 
 [features]
@@ -22,3 +23,4 @@ console = "0.16"
 tracing-subscriber = "0.3"
 tracing = "0.1"
 anyhow = "1"
+ww_self = { path = "../../ww_stdlib/ww_self" }

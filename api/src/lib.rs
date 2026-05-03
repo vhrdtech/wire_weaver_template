@@ -4,6 +4,8 @@ use wire_weaver::prelude::*;
 
 #[ww_trait]
 pub trait DeviceApiRoot {
+    fn led_on();
+    fn led_off();
     fn set_led_state(state: LedState);
     // fn do_work(query: Query<'i>) -> u16;
     // property!(ro button_pressed: bool);
